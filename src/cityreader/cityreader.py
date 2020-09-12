@@ -8,6 +8,9 @@ class City:
         self.lat = lat
         self.lon = lon
 
+    def __repr__(self):
+        return f"{self.name}, lat: {self.lat}, lon: {self.lon}"
+
 
 # We have a collection of US cities with population over 750,000 stored in the
 # file "cities.csv". (CSV stands for "comma-separated values".)
@@ -21,6 +24,10 @@ class City:
 #
 # Note that the first line of the CSV is header that describes the fields--this
 # should not be loaded into a City object.
+from csv import DictReader
+from pathlib import Path
+
+
 cities = []
 
 
@@ -29,6 +36,11 @@ def cityreader(cities=[]):
     # Ensure that the lat and lon valuse are all floats
     # For each city record, create a new City instance and add it to the
     # `cities` list
+    path = Path("cities.csv")
+
+    with open(path, newline="") as file:
+        reader = DictReader(file)
+        cities.extend(City(x["city"], float(x["lat"]), float(x["lng"])) for x in reader)
 
     return cities
 
@@ -69,13 +81,29 @@ for c in cities:
 # Salt Lake City: (40.7774,-111.9301)
 
 # TODO Get latitude and longitude values from the user
+# print("Please enter the corners of your square")
+# print("Expected format:")
+# print("lat1, lon1, lat2, lon2")
+# square = (int(x) for x in input("").split(','))
 
 
 def cityreader_stretch(lat1, lon1, lat2, lon2, cities=[]):
     # within will hold the cities that fall within the specified region
     within = []
 
+    # Latitude goes up from south to north
+    if lat1 < lat2:
+        lat1, lat2 = lat2, lat1
+    # Longitude goes further negative east to west.
+    if lon1 < lon2:
+        lon1, lon2 = lon2, lon1
+
     # Go through each city and check to see if it falls within
     # the specified coordinates.
+    within.extend(
+        city
+        for city in cities
+        if ((lat2 <= city.lat <= lat1) and (lon2 <= city.lon <= lon1))
+    )
 
     return within
